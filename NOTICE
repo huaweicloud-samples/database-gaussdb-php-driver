@@ -14,7 +14,7 @@ Third-party acknowledgements:
   covenant text is unchanged apart from inserting the reporting contact.
   https://www.contributor-covenant.org/version/2/1/code_of_conduct/
   https://creativecommons.org/licenses/by/4.0/
-- CI tooling (not runtime dependencies): GitHub Actions, markdownlint-cli2,
+- CI tooling (not runtime dependencies): GitHub Actions, markdownlint,
   Composer and Gitleaks remain subject to their respective upstream licenses.
 
 No GaussDB vendor binaries or third-party runtime package source are bundled.
