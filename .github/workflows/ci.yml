@@ -1,17 +1,115 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
-  ci:
-    name: ci
+  dco-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Placeholder check
-        run: echo "CI placeholder passed"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require author sign-off on contributed commits
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          with open(os.environ['GITHUB_EVENT_PATH']) as stream:
+              event = json.load(stream)
+          if 'pull_request' in event:
+              base = event['pull_request']['base']['sha']
+              head = event['pull_request']['head']['sha']
+          else:
+              head = event['after']
+              base = event.get('before', '')
+              if not base or set(base) == {'0'}:
+                  base = git('rev-parse', head + '^')
+          commits = git('rev-list', base + '..' + head).splitlines()
+          failures = []
+          for commit in commits:
+              name, email, body = git('show', '-s', '--format=%an%n%ae%n%B', commit).split('\n', 2)
+              trailer = 'Signed-off-by: ' + name + ' <' + email + '>'
+              if trailer not in body.splitlines():
+                  failures.append(commit)
+          if failures:
+              sys.exit('Missing author DCO sign-off: ' + ', '.join(failures))
+          print('DCO verified:', len(commits), 'commit(s)')
+          PY
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run lint:md
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan repository history without printing secret values
+        run: |
+          docker run --rm -v "$PWD:/repo:ro" \
+            ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --no-banner --log-opts=--all
+
+  iac-validate:
+    # Deployment is a local PHP script, not cloud IaC: validate syntax and lifecycle.
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.2', '8.3']
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate PHP and safe installation lifecycle
+        env:
+          PHP_IMAGE: php:${{ matrix.php }}-cli
+        run: |
+          docker run --rm -v "$PWD:/workspace:ro" -w /workspace "$PHP_IMAGE" sh -eu -c '
+            for file in src/*.php examples/*.php deploy/*.php; do php -l "$file"; done
+            export GAUSS_COMPAT_INSTALL_DIR=/tmp/gaussdb-compat-ci
+            php deploy/manage.php install
+            if php deploy/manage.php install; then exit 1; fi
+            if GAUSS_COMPAT_CONFIRM=NO php deploy/manage.php uninstall; then exit 1; fi
+            test -f /tmp/gaussdb-compat-ci/src/autoload.php
+            GAUSS_COMPAT_CONFIRM="REMOVE /tmp/gaussdb-compat-ci" php deploy/manage.php uninstall
+            test ! -e /tmp/gaussdb-compat-ci
+          '
+      - name: Validate locked PHP dependency metadata
+        run: |
+          docker run --rm -v "$PWD:/app:ro" -w /app composer:2.2.25 validate --strict
+
+  ci:
+    name: ci
+    if: always()
+    needs: [dco-check, markdown-lint, secret-scan, iac-validate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all quality gates
+        env:
+          DCO: ${{ needs.dco-check.result }}
+          MARKDOWN: ${{ needs.markdown-lint.result }}
+          SECRETS: ${{ needs.secret-scan.result }}
+          DEPLOY: ${{ needs.iac-validate.result }}
+        run: |
+          test "$DCO" = success
+          test "$MARKDOWN" = success
+          test "$SECRETS" = success
+          test "$DEPLOY" = success

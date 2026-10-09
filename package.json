@@ -1,0 +1,7 @@
+{
+  "name": "database-gaussdb-php-driver-doc-tooling",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {"lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#vendor'"},
+  "devDependencies": {"markdownlint-cli2": "0.18.1"}
+}
