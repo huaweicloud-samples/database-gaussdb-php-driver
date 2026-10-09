@@ -1,0 +1,20 @@
+GaussDB PHP M/ORA compatibility adapter
+Copyright 2026 the project contributors.
+
+Runtime PHP implementation originates from jarrenL/GaussDB-PHP-Driver,
+commit 377c56e39e852506e5a920c7471f3ba417f41269, with public-release
+documentation and packaging changes maintained in this repository.
+
+Third-party acknowledgements:
+- PHP/PDO/PDO_ODBC: PHP License; installed separately, no PHP C source included.
+- unixODBC driver manager: upstream component-specific licenses (including LGPL
+  for libraries); installed separately, not redistributed by this repository.
+- GaussDB official ODBC: vendor terms; obtained and installed separately.
+- CODE_OF_CONDUCT.md: Contributor Covenant 2.1, CC BY 4.0. The standard
+  covenant text is unchanged apart from inserting the reporting contact.
+  https://www.contributor-covenant.org/version/2/1/code_of_conduct/
+  https://creativecommons.org/licenses/by/4.0/
+- CI tooling (not runtime dependencies): GitHub Actions, markdownlint,
+  Composer and Gitleaks remain subject to their respective upstream licenses.
+
+No GaussDB vendor binaries or third-party runtime package source are bundled.

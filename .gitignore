@@ -1,0 +1,17 @@
+/vendor/
+/node_modules/
+/build/
+/dist/
+/tests/
+/.env
+/.env.*
+*.log
+*.pem
+*.key
+*.zip
+*.tar.gz
+*.so
+*.so.*
+*.dll
+*.exe
+.DS_Store

@@ -1,0 +1,20 @@
+{
+  "name": "huaweicloud-samples/gaussdb-php-compat",
+  "description": "Educational GaussDB M and Oracle compatibility adapter for PHP PDO_ODBC",
+  "type": "library",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/huaweicloud-samples/database-gaussdb-php-driver",
+  "support": {
+    "issues": "https://github.com/huaweicloud-samples/database-gaussdb-php-driver/issues",
+    "source": "https://github.com/huaweicloud-samples/database-gaussdb-php-driver"
+  },
+  "require": {
+    "php": ">=7.2.34",
+    "ext-pdo": "*",
+    "ext-pdo_odbc": "*",
+    "ext-ctype": "*",
+    "ext-json": "*",
+    "ext-hash": "*"
+  },
+  "autoload": {"psr-4": {"GaussDb\\Compat\\": "src/"}}
+}
