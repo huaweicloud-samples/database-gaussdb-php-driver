@@ -58,6 +58,8 @@ PHP 7.2 已停止官方安全维护，语法兼容不等于安全支持。
 
 ## 快速开始
 
+可从 [v0.1.0 发行页](https://github.com/huaweicloud-samples/database-gaussdb-php-driver/releases/tag/v0.1.0) 下载 ZIP 或 tar.gz 源码发行包。Windows/Linux 使用相同的 PHP 源码；包内不含 PHP、PDO_ODBC 扩展或厂商 ODBC 驱动。下载校验和解压步骤见 [发行包使用](docs/releases.md)，解压后可直接从下方 PHP 环境检查和安装步骤开始，无需克隆仓库。
+
 以下以 Linux Bash 为例。仅使用已审核合并的源码提交，生产部署固定提交或发布标签；尚未合并的 PR 不是正式发行版。
 
 ```bash
@@ -113,6 +115,7 @@ php deploy/manage.php uninstall
 
 ## 详细文档
 
+- [发行包下载、校验和解压](docs/releases.md)
 - [Linux/Windows 安装与 Composer 接入](docs/installation.md)
 - [API、参数绑定、事务和结果类型](docs/usage.md)
 - [全部部署及运行变量](deploy/variables.md)
